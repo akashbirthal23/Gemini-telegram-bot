@@ -1,35 +1,35 @@
-import os
 import json
+import os
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-from dotenv import load_dotenv
 from resp import get_resp
-
+from telegram.ext import Application, ContextTypes, CommandHandler, MessageHandler, filters
+from dotenv import load_dotenv
 load_dotenv()
 token = os.getenv('token')
 
-def start(update, context):
-    context.bot.send_message(
-        chat_id=update.effective_chat.id, 
-        text=f'Hii {update.message.from_user.first_name}, how can I help you today?'
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await context.bot.send_message(
+     chat_id=update.effective_chat.id, 
+     text=f"""Hii {update.message.from_user.first_name}, how can I help you today?
+     """
     )
 
-def help(update, context):
-    context.bot.send_message(
-        chat_id=update.effective_chat.id, 
-        text="""
-        This bot supports the following commands:
-         - /start: Welcoming users
-         - /help: List of supported commands (you are here)
-        """
+async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await context.bot.send_message(
+     chat_id=update.effective_chat.id, 
+     text="""
+     This bot supports the following commands:
+      - /start: Welcoming users
+      - /help: List of supported commands (you are here)
+     """
     )
-
-def echo(update, context):
+    
+async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text
 
     # Handle empty messages gracefully
     if not user_text:
-        context.bot.send_message(
+        await context.bot.send_message(
             chat_id=update.effective_chat.id,
             text='You sent an empty message.'
         )
@@ -41,29 +41,29 @@ def echo(update, context):
     try:
         json.dumps(response_text)
     except TypeError as e:
-        context.bot.send_message(
+        await context.bot.send_message(
             chat_id=update.effective_chat.id,
             text=f'Error: Unable to send response due to non-serializable content. {e}'
         )
         return
 
-    context.bot.send_message(
+    await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text=response_text
     )
 
-if __name__ == '__main__':
-    updater = Updater(token=token, use_context=True)
-    dispatcher = updater.dispatcher
 
+
+if __name__ == '__main__':
+    application = Application.builder().token(token).build()
+    
     start_handler = CommandHandler('start', start)
-    dispatcher.add_handler(start_handler)
+    application.add_handler(start_handler)
 
     help_handler = CommandHandler('help', help)
-    dispatcher.add_handler(help_handler)
+    application.add_handler(help_handler)
+    
+    echo_handler = MessageHandler(filters.TEXT & ~filters.COMMAND, echo)
+    application.add_handler(echo_handler)
 
-    echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
-    dispatcher.add_handler(echo_handler)
-
-    updater.start_polling()
-    updater.idle()
+    application.run_polling()
