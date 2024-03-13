@@ -10,36 +10,20 @@ token = os.getenv('token')
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
      chat_id=update.effective_chat.id, 
-     text='Hello and welcome to the BuiltIn Telegram bot!'
+     text=f"""Hii {update.message.from_user.first_name}, how can I help you today?
+     """
     )
 
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
      chat_id=update.effective_chat.id, 
      text="""
-     The BuiltIn Telegram bot supports the following commands:
+     This bot supports the following commands:
       - /start: Welcoming users
       - /help: List of supported commands (you are here)
-      - /first_name: Reports the user's first name
-      - /last_name: Reports the user's last name
      """
     )
-
-async def first_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    await context.bot.send_message(
-     chat_id=update.effective_chat.id, 
-     text=f'Your first name is {update.message.from_user.first_name}'
-    )
-
-
-async def last_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    await context.bot.send_message(
-     chat_id=update.effective_chat.id, 
-     text=f'Your last name is {update.message.from_user.last_name}'
-    )
     
-    
-
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text
 
@@ -78,12 +62,6 @@ if __name__ == '__main__':
 
     help_handler = CommandHandler('help', help)
     application.add_handler(help_handler)
-
-    first_name_handler = CommandHandler('first_name', first_name)
-    application.add_handler(first_name_handler)
-
-    last_name_handler = CommandHandler('last_name', last_name)
-    application.add_handler(last_name_handler)
     
     echo_handler = MessageHandler(filters.TEXT & ~filters.COMMAND, echo)
     application.add_handler(echo_handler)
